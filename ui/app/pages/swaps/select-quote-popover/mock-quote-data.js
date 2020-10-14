@@ -95,7 +95,7 @@ const quoteDataRows = [
     metaMaskFee: '1.05 DAI',
     networkFees: '$10.30',
     quoteSource: 'DEX',
-    rawNetworkFees: 10.30,
+    rawNetworkFees: 10.3,
     slippage: '1%',
     sourceTokenDecimals: 18,
     sourceTokenSymbol: 'ETH',

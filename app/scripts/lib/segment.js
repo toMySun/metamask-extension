@@ -7,13 +7,13 @@ const flushAt = inDevelopment ? 1 : undefined
 const METAMETRICS_ANONYMOUS_ID = '0x0000000000000000'
 
 const segmentNoop = {
-  track () {
+  track() {
     // noop
   },
-  page () {
+  page() {
     // noop
   },
-  identify () {
+  identify() {
     // noop
   },
 }
@@ -36,14 +36,15 @@ const segment = process.env.SEGMENT_WRITE_KEY
  * @param {Function} getMetricsState - A function for getting state relevant
  * to MetaMetrics/Segment.
  */
-export function getTrackSegmentEvent (
+export function getTrackSegmentEvent(
   metamaskVersion,
   getParticipateInMetrics,
   getMetricsState,
 ) {
-  const version = process.env.METAMASK_ENVIRONMENT === 'production'
-    ? metamaskVersion
-    : `${metamaskVersion}-${process.env.METAMASK_ENVIRONMENT}`
+  const version =
+    process.env.METAMASK_ENVIRONMENT === 'production'
+      ? metamaskVersion
+      : `${metamaskVersion}-${process.env.METAMASK_ENVIRONMENT}`
 
   const segmentContext = {
     app: {
@@ -68,7 +69,7 @@ export function getTrackSegmentEvent (
    * @param {boolean} [excludeMetaMetricsId] - `true` if the user's MetaMetrics id should
    * not be included, and `false` otherwise. Default: `true`
    */
-  return function trackSegmentEvent ({
+  return function trackSegmentEvent({
     event,
     category,
     properties = {},

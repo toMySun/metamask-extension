@@ -22,8 +22,16 @@ export const FasterThanExpectedCompletion = () => {
   }, [done, loading])
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <div style={{ height: '600px', width: '357px', border: '1px solid grey' }}>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <div
+        style={{ height: '600px', width: '357px', border: '1px solid grey' }}
+      >
         <LoadingSwapsQuotes
           loadingComplete={loadingComplete}
           onDone={() => setDone(true)}
@@ -50,8 +58,16 @@ export const SlowerThanExpectedCompletion = () => {
   }, [done, loading])
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <div style={{ height: '600px', width: '357px', border: '1px solid grey' }}>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <div
+        style={{ height: '600px', width: '357px', border: '1px solid grey' }}
+      >
         <LoadingSwapsQuotes
           loadingComplete={loadingComplete}
           onDone={() => setDone(true)}
@@ -78,8 +94,16 @@ export const FasterThanExpectedCompletionWithError = () => {
   }, [done, loading])
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <div style={{ height: '600px', width: '357px', border: '1px solid grey' }}>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <div
+        style={{ height: '600px', width: '357px', border: '1px solid grey' }}
+      >
         <LoadingSwapsQuotes
           loadingComplete={loadingComplete}
           onDone={() => setDone(true)}

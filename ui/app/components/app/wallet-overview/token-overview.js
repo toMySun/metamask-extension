@@ -7,13 +7,26 @@ import Identicon from '../../ui/identicon'
 import Tooltip from '../../ui/tooltip'
 import CurrencyDisplay from '../../ui/currency-display'
 import { I18nContext } from '../../../contexts/i18n'
-import { SEND_ROUTE, BUILD_QUOTE_ROUTE } from '../../../helpers/constants/routes'
-import { useMetricEvent, useNewMetricEvent } from '../../../hooks/useMetricEvent'
+import {
+  SEND_ROUTE,
+  BUILD_QUOTE_ROUTE,
+} from '../../../helpers/constants/routes'
+import {
+  useMetricEvent,
+  useNewMetricEvent,
+} from '../../../hooks/useMetricEvent'
 import { useTokenTracker } from '../../../hooks/useTokenTracker'
 import { useTokenFiatAmount } from '../../../hooks/useTokenFiatAmount'
 import { updateSendToken } from '../../../store/actions'
-import { getSwapsFeatureLiveness, setSwapsFromToken } from '../../../ducks/swaps/swaps'
-import { getAssetImages, getCurrentKeyring, getCurrentNetworkId } from '../../../selectors/selectors'
+import {
+  getSwapsFeatureLiveness,
+  setSwapsFromToken,
+} from '../../../ducks/swaps/swaps'
+import {
+  getAssetImages,
+  getCurrentKeyring,
+  getCurrentNetworkId,
+} from '../../../selectors/selectors'
 import { MAINNET_NETWORK_ID } from '../../../../../app/scripts/controllers/network/enums'
 
 import SwapIcon from '../../ui/icon/swap-icon.component'
@@ -39,34 +52,38 @@ const TokenOverview = ({ className, token }) => {
   const usingHardwareWallet = keyring.type.search('Hardware') !== -1
   const { tokensWithBalances } = useTokenTracker([token])
   const balance = tokensWithBalances[0]?.string
-  const formattedFiatBalance = useTokenFiatAmount(token.address, balance, token.symbol)
+  const formattedFiatBalance = useTokenFiatAmount(
+    token.address,
+    balance,
+    token.symbol,
+  )
   const networkId = useSelector(getCurrentNetworkId)
-  const enteredSwapsEvent = useNewMetricEvent({ event: 'Swaps Opened', properties: { source: 'Token View', active_currency: token.symbol }, category: 'swaps' })
+  const enteredSwapsEvent = useNewMetricEvent({
+    event: 'Swaps Opened',
+    properties: { source: 'Token View', active_currency: token.symbol },
+    category: 'swaps',
+  })
   const swapsEnabled = useSelector(getSwapsFeatureLiveness)
 
   return (
     <WalletOverview
-      balance={(
+      balance={
         <div className="token-overview__balance">
           <CurrencyDisplay
             className="token-overview__primary-balance"
             displayValue={balance}
             suffix={token.symbol}
           />
-          {
-            formattedFiatBalance
-              ? (
-                <CurrencyDisplay
-                  className="token-overview__secondary-balance"
-                  displayValue={formattedFiatBalance}
-                  hideLabel
-                />
-              )
-              : null
-          }
+          {formattedFiatBalance ? (
+            <CurrencyDisplay
+              className="token-overview__secondary-balance"
+              displayValue={formattedFiatBalance}
+              hideLabel
+            />
+          ) : null}
         </div>
-      )}
-      buttons={(
+      }
+      buttons={
         <>
           <IconButton
             className="token-overview__button"
@@ -87,7 +104,12 @@ const TokenOverview = ({ className, token }) => {
               onClick={() => {
                 if (networkId === MAINNET_NETWORK_ID) {
                   enteredSwapsEvent()
-                  dispatch(setSwapsFromToken({ ...token, iconUrl: assetImages[token.address] }))
+                  dispatch(
+                    setSwapsFromToken({
+                      ...token,
+                      iconUrl: assetImages[token.address],
+                    }),
+                  )
                   if (usingHardwareWallet) {
                     global.platform.openExtensionInBrowser(BUILD_QUOTE_ROUTE)
                   } else {
@@ -95,24 +117,28 @@ const TokenOverview = ({ className, token }) => {
                   }
                 }
               }}
-              label={ t('swap') }
+              label={t('swap')}
               tooltipRender={(contents) => (
-                <Tooltip title={t('onlyAvailableOnMainnet')} position="bottom" disabled={networkId === '1'}>
+                <Tooltip
+                  title={t('onlyAvailableOnMainnet')}
+                  position="bottom"
+                  disabled={networkId === '1'}
+                >
                   {contents}
                 </Tooltip>
               )}
             />
           ) : null}
         </>
-      )}
+      }
       className={className}
-      icon={(
+      icon={
         <Identicon
           diameter={32}
           address={token.address}
           image={assetImages[token.address]}
         />
-      )}
+      }
     />
   )
 }

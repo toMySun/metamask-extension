@@ -41,8 +41,11 @@ export default class NetworkForm extends PureComponent {
     errors: {},
   }
 
-  componentDidUpdate (prevProps) {
-    const { rpcUrl: prevRpcUrl, networksTabIsInAddMode: prevAddMode } = prevProps
+  componentDidUpdate(prevProps) {
+    const {
+      rpcUrl: prevRpcUrl,
+      networksTabIsInAddMode: prevAddMode,
+    } = prevProps
     const {
       rpcUrl,
       chainId,
@@ -62,11 +65,18 @@ export default class NetworkForm extends PureComponent {
         errors: {},
       })
     } else if (prevRpcUrl !== rpcUrl) {
-      this.setState({ rpcUrl, chainId, ticker, networkName, blockExplorerUrl, errors: {} })
+      this.setState({
+        rpcUrl,
+        chainId,
+        ticker,
+        networkName,
+        blockExplorerUrl,
+        errors: {},
+      })
     }
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     this.props.onClear()
     this.setState({
       rpcUrl: '',
@@ -78,7 +88,7 @@ export default class NetworkForm extends PureComponent {
     })
   }
 
-  resetForm () {
+  resetForm() {
     const {
       rpcUrl,
       chainId,
@@ -87,7 +97,14 @@ export default class NetworkForm extends PureComponent {
       blockExplorerUrl,
     } = this.props
 
-    this.setState({ rpcUrl, chainId, ticker, networkName, blockExplorerUrl, errors: {} })
+    this.setState({
+      rpcUrl,
+      chainId,
+      ticker,
+      networkName,
+      blockExplorerUrl,
+      errors: {},
+    })
   }
 
   onSubmit = async () => {
@@ -110,7 +127,7 @@ export default class NetworkForm extends PureComponent {
     // Ensure chainId is a 0x-prefixed, lowercase hex string
     let chainId = stateChainId.trim().toLowerCase()
     if (!chainId.startsWith('0x')) {
-      chainId = `0x${(new BigNumber(chainId, 10)).toString(16)}`
+      chainId = `0x${new BigNumber(chainId, 10).toString(16)}`
     }
 
     if (!(await this.validateChainIdOnSubmit(chainId, rpcUrl))) {
@@ -135,10 +152,7 @@ export default class NetworkForm extends PureComponent {
   }
 
   onCancel = () => {
-    const {
-      networksTabIsInAddMode,
-      onClear,
-    } = this.props
+    const { networksTabIsInAddMode, onClear } = this.props
 
     if (networksTabIsInAddMode) {
       onClear()
@@ -158,7 +172,7 @@ export default class NetworkForm extends PureComponent {
     })
   }
 
-  stateIsUnchanged () {
+  stateIsUnchanged() {
     const {
       rpcUrl,
       chainId,
@@ -184,7 +198,14 @@ export default class NetworkForm extends PureComponent {
     )
   }
 
-  renderFormTextField (fieldKey, textFieldId, onChange, value, optionalTextFieldKey, tooltipText) {
+  renderFormTextField(
+    fieldKey,
+    textFieldId,
+    onChange,
+    value,
+    optionalTextFieldKey,
+    tooltipText,
+  ) {
     const { errors } = this.state
     const { viewOnly } = this.props
 
@@ -194,19 +215,15 @@ export default class NetworkForm extends PureComponent {
           <div className="networks-tab__network-form-label-text">
             {this.context.t(optionalTextFieldKey || fieldKey)}
           </div>
-          {
-            !viewOnly && tooltipText
-              ? (
-                <Tooltip
-                  position="top"
-                  title={tooltipText}
-                  wrapperClassName="networks-tab__network-form-label-tooltip"
-                >
-                  <i className="fa fa-info-circle" />
-                </Tooltip>
-              )
-              : null
-          }
+          {!viewOnly && tooltipText ? (
+            <Tooltip
+              position="top"
+              title={tooltipText}
+              wrapperClassName="networks-tab__network-form-label-tooltip"
+            >
+              <i className="fa fa-info-circle" />
+            </Tooltip>
+          ) : null}
         </div>
         <TextField
           type="text"
@@ -243,12 +260,12 @@ export default class NetworkForm extends PureComponent {
     let errorMessage = ''
 
     if (chainId.startsWith('0x')) {
-      if (!(/^0x[0-9a-f]+$/ui).test(chainId)) {
+      if (!/^0x[0-9a-f]+$/iu.test(chainId)) {
         errorMessage = this.context.t('invalidHexNumber')
       } else if (!isPrefixedFormattedHexString(chainId)) {
         errorMessage = this.context.t('invalidHexNumberLeadingZeros')
       }
-    } else if (!(/^[0-9]+$/u).test(chainId)) {
+    } else if (!/^[0-9]+$/u.test(chainId)) {
       errorMessage = this.context.t('invalidNumber')
     } else if (chainId.startsWith('0')) {
       errorMessage = this.context.t('invalidNumberLeadingZeros')
@@ -294,7 +311,14 @@ export default class NetworkForm extends PureComponent {
 
   validateBlockExplorerURL = (url, stateKey) => {
     if (!validUrl.isWebUri(url) && url !== '') {
-      this.setErrorTo(stateKey, this.context.t(this.isValidWhenAppended(url) ? 'urlErrorMsg' : 'invalidBlockExplorerURL'))
+      this.setErrorTo(
+        stateKey,
+        this.context.t(
+          this.isValidWhenAppended(url)
+            ? 'urlErrorMsg'
+            : 'invalidBlockExplorerURL',
+        ),
+      )
     } else {
       this.setErrorTo(stateKey, '')
     }
@@ -304,7 +328,12 @@ export default class NetworkForm extends PureComponent {
     const { rpcUrls } = this.props
 
     if (!validUrl.isWebUri(url) && url !== '') {
-      this.setErrorTo(stateKey, this.context.t(this.isValidWhenAppended(url) ? 'urlErrorMsg' : 'invalidRPC'))
+      this.setErrorTo(
+        stateKey,
+        this.context.t(
+          this.isValidWhenAppended(url) ? 'urlErrorMsg' : 'invalidRPC',
+        ),
+      )
     } else if (rpcUrls.includes(url)) {
       this.setErrorTo(stateKey, this.context.t('urlExistsErrorMsg'))
     } else {
@@ -312,7 +341,7 @@ export default class NetworkForm extends PureComponent {
     }
   }
 
-  renderWarning () {
+  renderWarning() {
     const { t } = this.context
     return (
       <div className="networks-tab__network-form-row--warning">
@@ -321,13 +350,9 @@ export default class NetworkForm extends PureComponent {
     )
   }
 
-  render () {
+  render() {
     const { t } = this.context
-    const {
-      viewOnly,
-      isCurrentRpcTarget,
-      networksTabIsInAddMode,
-    } = this.props
+    const { viewOnly, isCurrentRpcTarget, networksTabIsInAddMode } = this.props
     const {
       networkName,
       rpcUrl,
@@ -337,14 +362,14 @@ export default class NetworkForm extends PureComponent {
       errors,
     } = this.state
 
-    const isSubmitDisabled = (
+    const isSubmitDisabled =
       viewOnly ||
       this.stateIsUnchanged() ||
       !rpcUrl ||
       !chainId ||
       Object.values(errors).some((x) => x)
-    )
-    const deletable = !networksTabIsInAddMode && !isCurrentRpcTarget && !viewOnly
+    const deletable =
+      !networksTabIsInAddMode && !isCurrentRpcTarget && !viewOnly
 
     return (
       <div className="networks-tab__network-form">
@@ -379,34 +404,32 @@ export default class NetworkForm extends PureComponent {
         {this.renderFormTextField(
           'blockExplorerUrl',
           'block-explorer-url',
-          this.setStateWithValue('blockExplorerUrl', this.validateBlockExplorerURL),
+          this.setStateWithValue(
+            'blockExplorerUrl',
+            this.validateBlockExplorerURL,
+          ),
           blockExplorerUrl,
           'optionalBlockExplorerUrl',
         )}
         <div className="network-form__footer">
-          {
-            deletable && (
-              <Button
-                type="danger"
-                onClick={this.onDelete}
-              >
-                { t('delete') }
-              </Button>
-            )
-          }
+          {deletable && (
+            <Button type="danger" onClick={this.onDelete}>
+              {t('delete')}
+            </Button>
+          )}
           <Button
             type="default"
             onClick={this.onCancel}
             disabled={viewOnly || this.stateIsUnchanged()}
           >
-            { t('cancel') }
+            {t('cancel')}
           </Button>
           <Button
             type="secondary"
             disabled={isSubmitDisabled}
             onClick={this.onSubmit}
           >
-            { t('save') }
+            {t('save')}
           </Button>
         </div>
       </div>

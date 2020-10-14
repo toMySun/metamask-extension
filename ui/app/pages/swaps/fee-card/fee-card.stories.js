@@ -16,27 +16,30 @@ export const WithAllProps = () => {
     <div style={containerStyle}>
       <FeeCard
         feeRowText={text('feeRowText', 'Network fees')}
-        primaryFee={({
+        primaryFee={{
           fee: text('primaryFee', '1 ETH'),
           maxFee: text('primaryMaxFee', '2 ETH'),
-        })}
-        secondaryFee={({
+        }}
+        secondaryFee={{
           fee: text('secondaryFee', '100 USD'),
           maxFee: text('secondaryMaxFee', '200 USD'),
-        })}
-        maxFeeRow={({
+        }}
+        maxFeeRow={{
           text: text('maxFeeText', 'Max Fee'),
           linkText: text('maxFeeLinkText', 'Edit'),
           tooltipText: text('maxFeeTooltipText', 'Click here to edit.'),
           onClick: action('Clicked max fee row link'),
-        })}
-        thirdRow={({
+        }}
+        thirdRow={{
           text: text('thirdRowText', 'Extra Option'),
           linkText: text('thirdRowLinkText', 'Click Me'),
-          tooltipText: text('thirdRowTooltipText', 'Something happens if you click this'),
+          tooltipText: text(
+            'thirdRowTooltipText',
+            'Something happens if you click this',
+          ),
           onClick: action('Clicked third row link'),
           hide: false,
-        })}
+        }}
       />
     </div>
   )
@@ -47,27 +50,30 @@ export const WithoutThirdRow = () => {
     <div style={containerStyle}>
       <FeeCard
         feeRowText={text('feeRowText', 'Network fees')}
-        primaryFee={({
+        primaryFee={{
           fee: text('primaryFee', '1 ETH'),
           maxFee: text('primaryMaxFee', '2 ETH'),
-        })}
-        secondaryFee={({
+        }}
+        secondaryFee={{
           fee: text('secondaryFee', '100 USD'),
           maxFee: text('secondaryMaxFee', '200 USD'),
-        })}
-        maxFeeRow={({
+        }}
+        maxFeeRow={{
           text: text('maxFeeText', 'Max Fee'),
           linkText: text('maxFeeLinkText', 'Edit'),
           tooltipText: text('maxFeeTooltipText', 'Click here to edit.'),
           onClick: action('Clicked max fee row link'),
-        })}
-        thirdRow={({
+        }}
+        thirdRow={{
           text: text('thirdRowText', 'Extra Option'),
           linkText: text('thirdRowLinkText', 'Click Me'),
-          tooltipText: text('thirdRowTooltipText', 'Something happens if you click this'),
+          tooltipText: text(
+            'thirdRowTooltipText',
+            'Something happens if you click this',
+          ),
           onClick: action('Clicked third row link'),
           hide: true,
-        })}
+        }}
       />
     </div>
   )
@@ -78,16 +84,16 @@ export const WithOnlyRequiredProps = () => {
     <div style={containerStyle}>
       <FeeCard
         feeRowText={text('feeRowText', 'Network fees')}
-        primaryFee={({
+        primaryFee={{
           fee: text('primaryFee', '1 ETH'),
           maxFee: text('primaryMaxFee', '2 ETH'),
-        })}
-        maxFeeRow={({
+        }}
+        maxFeeRow={{
           text: text('maxFeeText', 'Max Fee'),
           linkText: text('maxFeeLinkText', 'Edit'),
           tooltipText: text('maxFeeTooltipText', 'Click here to edit.'),
           onClick: action('Clicked max fee row link'),
-        })}
+        }}
       />
     </div>
   )

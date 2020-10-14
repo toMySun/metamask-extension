@@ -3,16 +3,20 @@
  * MetaMetrics is our own brand, and should remain aptly named regardless of the underlying
  * metrics system. This file implements Segment analytics tracking.
  */
-import React, { useRef, Component, createContext, useEffect, useCallback } from 'react'
+import React, {
+  useRef,
+  Component,
+  createContext,
+  useEffect,
+  useCallback,
+} from 'react'
 import { useSelector } from 'react-redux'
 import PropTypes from 'prop-types'
 import { useLocation, matchPath, useRouteMatch } from 'react-router-dom'
 import { captureException, captureMessage } from '@sentry/browser'
 
 import { omit } from 'lodash'
-import {
-  getCurrentNetworkId,
-} from '../selectors/selectors'
+import { getCurrentNetworkId } from '../selectors/selectors'
 
 import { getEnvironmentType } from '../../../app/scripts/lib/util'
 import {
@@ -26,32 +30,42 @@ import { txDataSelector } from '../selectors'
 
 export const MetaMetricsContext = createContext(() => {
   captureException(
-    Error(`MetaMetrics context function was called from a react node that is not a descendant of a MetaMetrics context provider`),
+    Error(
+      `MetaMetrics context function was called from a react node that is not a descendant of a MetaMetrics context provider`,
+    ),
   )
 })
 
 const PATHS_TO_CHECK = Object.keys(PATH_NAME_MAP)
 
-function useSegmentContext () {
-  const match = useRouteMatch({ path: PATHS_TO_CHECK, exact: true, strict: true })
+function useSegmentContext() {
+  const match = useRouteMatch({
+    path: PATHS_TO_CHECK,
+    exact: true,
+    strict: true,
+  })
   const locale = useSelector(getCurrentLocale)
   const txData = useSelector(txDataSelector) || {}
   const confirmTransactionOrigin = txData.origin
 
-  const referrer = confirmTransactionOrigin ? {
-    url: confirmTransactionOrigin,
-  } : undefined
+  const referrer = confirmTransactionOrigin
+    ? {
+        url: confirmTransactionOrigin,
+      }
+    : undefined
 
   let version = global.platform.getVersion()
   if (process.env.METAMASK_ENVIRONMENT !== 'production') {
     version = `${version}-${process.env.METAMASK_ENVIRONMENT}`
   }
 
-  const page = match ? {
-    path: match.path,
-    title: PATH_NAME_MAP[match.path],
-    url: match.path,
-  } : undefined
+  const page = match
+    ? {
+        path: match.path,
+        title: PATH_NAME_MAP[match.path],
+        url: match.path,
+      }
+    : undefined
 
   return {
     app: {
@@ -65,11 +79,15 @@ function useSegmentContext () {
   }
 }
 
-export function MetaMetricsProvider ({ children }) {
+export function MetaMetricsProvider({ children }) {
   const network = useSelector(getCurrentNetworkId)
   const metaMetricsId = useSelector((state) => state.metamask.metaMetricsId)
-  const participateInMetaMetrics = useSelector((state) => state.metamask.participateInMetaMetrics)
-  const metaMetricsSendCount = useSelector((state) => state.metamask.metaMetricsSendCount)
+  const participateInMetaMetrics = useSelector(
+    (state) => state.metamask.participateInMetaMetrics,
+  )
+  const metaMetricsSendCount = useSelector(
+    (state) => state.metamask.metaMetricsSendCount,
+  )
   const location = useLocation()
   const context = useSegmentContext()
 
@@ -85,13 +103,18 @@ export function MetaMetricsProvider ({ children }) {
   useEffect(() => {
     const environmentType = getEnvironmentType()
     if (
-      (participateInMetaMetrics === null && location.pathname.startsWith('/initialize')) ||
+      (participateInMetaMetrics === null &&
+        location.pathname.startsWith('/initialize')) ||
       participateInMetaMetrics
     ) {
       // Events that happen during initialization before the user opts into MetaMetrics will be anonymous
       const idTrait = metaMetricsId ? 'userId' : 'anonymousId'
       const idValue = metaMetricsId ?? METAMETRICS_ANONYMOUS_ID
-      const match = matchPath(location.pathname, { path: PATHS_TO_CHECK, exact: true, strict: true })
+      const match = matchPath(location.pathname, {
+        path: PATHS_TO_CHECK,
+        exact: true,
+        strict: true,
+      })
       if (
         match &&
         previousMatch.current !== match.path &&
@@ -120,7 +143,9 @@ export function MetaMetricsProvider ({ children }) {
         // We have more specific pages for each type of transaction confirmation
         // The user lands on /confirm-transaction first, then is redirected based on
         // the contents of state.
-        captureMessage(`${location.pathname} would have issued a page track event to segment, but no route match was found`)
+        captureMessage(
+          `${location.pathname} would have issued a page track event to segment, but no route match was found`,
+        )
       }
       previousMatch.current = match?.path
     }
@@ -142,10 +167,20 @@ export function MetaMetricsProvider ({ children }) {
    */
   const trackEvent = useCallback(
     (config = {}) => {
-      const { event, category, isOptIn = false, properties = {}, revenue, value, currency } = config
+      const {
+        event,
+        category,
+        isOptIn = false,
+        properties = {},
+        revenue,
+        value,
+        currency,
+      } = config
       if (!event) {
         // Event name is required for tracking an event
-        throw new Error('MetaMetrics trackEvent function must be provided a payload with an "event" key')
+        throw new Error(
+          'MetaMetrics trackEvent function must be provided a payload with an "event" key',
+        )
       }
       if (!category) {
         // Category must be supplied for every tracking event
@@ -163,7 +198,9 @@ export function MetaMetricsProvider ({ children }) {
         excludeMetaMetricsId = true
       }
       const idTrait = excludeMetaMetricsId ? 'anonymousId' : 'userId'
-      const idValue = excludeMetaMetricsId ? METAMETRICS_ANONYMOUS_ID : metaMetricsId
+      const idValue = excludeMetaMetricsId
+        ? METAMETRICS_ANONYMOUS_ID
+        : metaMetricsId
 
       if (participateInMetaMetrics || isOptIn) {
         segment.track({
@@ -183,7 +220,8 @@ export function MetaMetricsProvider ({ children }) {
       }
 
       return undefined
-    }, [
+    },
+    [
       context,
       network,
       metaMetricsId,
@@ -219,13 +257,13 @@ export class LegacyMetaMetricsProvider extends Component {
     trackEvent: PropTypes.func,
   }
 
-  getChildContext () {
+  getChildContext() {
     return {
       trackEvent: this.context,
     }
   }
 
-  render () {
+  render() {
     return this.props.children
   }
 }

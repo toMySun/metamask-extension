@@ -44,12 +44,13 @@ const MOCK_QUOTES = {
   },
 }
 const MOCK_APPROVAL_NEEDED = {
-  'data': '0x095ea7b300000000000000000000000095e6f48254609a6ee006f7d493c8e5fb97094cef0000000000000000000000000000000000000000004a817c7ffffffdabf41c00',
-  'to': '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-  'amount': '0',
-  'from': '0x2369267687A84ac7B494daE2f1542C40E37f4455',
-  'gas': '12',
-  'gasPrice': '34',
+  data:
+    '0x095ea7b300000000000000000000000095e6f48254609a6ee006f7d493c8e5fb97094cef0000000000000000000000000000000000000000004a817c7ffffffdabf41c00',
+  to: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+  amount: '0',
+  from: '0x2369267687A84ac7B494daE2f1542C40E37f4455',
+  gas: '12',
+  gasPrice: '34',
 }
 const MOCK_QUOTES_APPROVAL_REQUIRED = {
   [TEST_AGG_ID]: {
@@ -494,7 +495,6 @@ describe('SwapsController', function () {
     })
 
     describe('_setupSwapsLivenessFetching ', function () {
-
       let clock
       const EXPECTED_TIME = 600000
 
@@ -517,15 +517,11 @@ describe('SwapsController', function () {
         clock = sandbox.useFakeTimers()
         sandbox.spy(clock, 'setInterval')
 
-        sandbox.stub(
-          SwapsController.prototype,
-          '_fetchAndSetSwapsLiveness',
-        ).resolves(undefined)
+        sandbox
+          .stub(SwapsController.prototype, '_fetchAndSetSwapsLiveness')
+          .resolves(undefined)
 
-        sandbox.spy(
-          SwapsController.prototype,
-          '_setupSwapsLivenessFetching',
-        )
+        sandbox.spy(SwapsController.prototype, '_setupSwapsLivenessFetching')
 
         sandbox.spy(window, 'addEventListener')
       })
@@ -541,12 +537,8 @@ describe('SwapsController', function () {
           swapsController._setupSwapsLivenessFetching.calledOnce,
           'should have called _setupSwapsLivenessFetching once',
         )
-        assert.ok(
-          window.addEventListener.calledWith('online'),
-        )
-        assert.ok(
-          window.addEventListener.calledWith('offline'),
-        )
+        assert.ok(window.addEventListener.calledWith('online'))
+        assert.ok(window.addEventListener.calledWith('offline'))
         assert.ok(
           clock.setInterval.calledOnceWithExactly(
             sinon.match.func,
@@ -573,7 +565,8 @@ describe('SwapsController', function () {
           'should not have set an interval',
         )
         assert.strictEqual(
-          getLivenessState(), false,
+          getLivenessState(),
+          false,
           'swaps feature should be disabled',
         )
 
@@ -648,24 +641,21 @@ describe('SwapsController', function () {
           'should have called updateState once',
         )
         assert.strictEqual(
-          getLivenessState(), false,
+          getLivenessState(),
+          false,
           'swaps feature should be disabled',
         )
       })
     })
 
     describe('_fetchAndSetSwapsLiveness', function () {
-
       const getLivenessState = () => {
         return swapsController.store.getState().swapsState.swapsFeatureIsLive
       }
 
       beforeEach(function () {
         fetchSwapsFeatureLivenessStub.reset()
-        sandbox.stub(
-          SwapsController.prototype,
-          '_setupSwapsLivenessFetching',
-        )
+        sandbox.stub(SwapsController.prototype, '_setupSwapsLivenessFetching')
         swapsController = getSwapsController()
       })
 
@@ -677,7 +667,9 @@ describe('SwapsController', function () {
         fetchSwapsFeatureLivenessStub.resolves(true)
 
         assert.strictEqual(
-          getLivenessState(), false, 'liveness should be false on boot',
+          getLivenessState(),
+          false,
+          'liveness should be false on boot',
         )
 
         await swapsController._fetchAndSetSwapsLiveness()
@@ -687,7 +679,9 @@ describe('SwapsController', function () {
           'should have called fetch function once',
         )
         assert.strictEqual(
-          getLivenessState(), true, 'liveness should be true after call',
+          getLivenessState(),
+          true,
+          'liveness should be true after call',
         )
       })
 
@@ -696,7 +690,9 @@ describe('SwapsController', function () {
         sandbox.spy(swapsController.store, 'updateState')
 
         assert.strictEqual(
-          getLivenessState(), false, 'liveness should be false on boot',
+          getLivenessState(),
+          false,
+          'liveness should be false on boot',
         )
 
         await swapsController._fetchAndSetSwapsLiveness()
@@ -710,7 +706,9 @@ describe('SwapsController', function () {
           'should not have called store.updateState',
         )
         assert.strictEqual(
-          getLivenessState(), false, 'liveness should remain false after call',
+          getLivenessState(),
+          false,
+          'liveness should remain false after call',
         )
       })
 
@@ -720,7 +718,9 @@ describe('SwapsController', function () {
         sandbox.spy(swapsController.store, 'updateState')
 
         assert.strictEqual(
-          getLivenessState(), false, 'liveness should be false on boot',
+          getLivenessState(),
+          false,
+          'liveness should be false on boot',
         )
 
         swapsController._fetchAndSetSwapsLiveness()
@@ -735,7 +735,9 @@ describe('SwapsController', function () {
           'should not have called store.updateState',
         )
         assert.strictEqual(
-          getLivenessState(), false, 'liveness should remain false after call',
+          getLivenessState(),
+          false,
+          'liveness should remain false after call',
         )
       })
 
@@ -746,18 +748,23 @@ describe('SwapsController', function () {
         fetchSwapsFeatureLivenessStub.onCall(2).resolves(true)
 
         assert.strictEqual(
-          getLivenessState(), false, 'liveness should be false on boot',
+          getLivenessState(),
+          false,
+          'liveness should be false on boot',
         )
 
         swapsController._fetchAndSetSwapsLiveness()
         await clock.runAllAsync()
 
         assert.strictEqual(
-          fetchSwapsFeatureLivenessStub.callCount, 3,
+          fetchSwapsFeatureLivenessStub.callCount,
+          3,
           'should have called fetch function three times',
         )
         assert.strictEqual(
-          getLivenessState(), true, 'liveness should be true after call',
+          getLivenessState(),
+          true,
+          'liveness should be true after call',
         )
       })
     })

@@ -3,15 +3,22 @@ import BigNumber from 'bignumber.js'
 import abi from 'human-standard-token-abi'
 import { isValidAddress } from 'ethereumjs-util'
 import { calcTokenValue, calcTokenAmount } from '../../helpers/utils/token-util'
-import { constructTxParams, toPrecisionWithoutTrailingZeros } from '../../helpers/utils/util'
-import { decimalToHex, getValueFromWeiHex } from '../../helpers/utils/conversions.util'
+import {
+  constructTxParams,
+  toPrecisionWithoutTrailingZeros,
+} from '../../helpers/utils/util'
+import {
+  decimalToHex,
+  getValueFromWeiHex,
+} from '../../helpers/utils/conversions.util'
 import { subtractCurrencies } from '../../helpers/utils/conversion-util'
 import { formatCurrency } from '../../helpers/utils/confirm-tx.util'
 import fetchWithCache from '../../helpers/utils/fetch-with-cache'
 
 import { calcGasTotal } from '../send/send.utils'
 
-const TOKEN_TRANSFER_LOG_TOPIC_HASH = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
+const TOKEN_TRANSFER_LOG_TOPIC_HASH =
+  '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
 
 const CACHE_REFRESH_ONE_HOUR = 3600000
 
@@ -36,26 +43,29 @@ const getBaseApi = function (type) {
 
 const validHex = (string) => Boolean(string?.match(/^0x[a-f0-9]+$/u))
 const truthyString = (string) => Boolean(string?.length)
-const truthyDigitString = (string) => truthyString(string) && Boolean(string.match(/^\d+$/u))
+const truthyDigitString = (string) =>
+  truthyString(string) && Boolean(string.match(/^\d+$/u))
 
 const QUOTE_VALIDATORS = [
   {
     property: 'trade',
     type: 'object',
-    validator: (trade) => trade && validHex(trade.data) && isValidAddress(trade.to) && isValidAddress(trade.from) && truthyString(trade.value),
+    validator: (trade) =>
+      trade &&
+      validHex(trade.data) &&
+      isValidAddress(trade.to) &&
+      isValidAddress(trade.from) &&
+      truthyString(trade.value),
   },
   {
     property: 'approvalNeeded',
     type: 'object',
-    validator: (approvalTx) => (
+    validator: (approvalTx) =>
       approvalTx === null ||
-      (
-        approvalTx &&
+      (approvalTx &&
         validHex(approvalTx.data) &&
         isValidAddress(approvalTx.to) &&
-        isValidAddress(approvalTx.from)
-      )
-    ),
+        isValidAddress(approvalTx.from)),
   },
   {
     property: 'sourceAmount',
@@ -140,19 +150,26 @@ const AGGREGATOR_METADATA_VALIDATORS = [
   },
 ]
 
-function validateData (validators, object, urlUsed) {
+function validateData(validators, object, urlUsed) {
   return validators.every(({ property, type, validator }) => {
     const types = type.split('|')
 
-    const valid = types.some((_type) => typeof object[property] === _type) && (!validator || validator(object[property]))
+    const valid =
+      types.some((_type) => typeof object[property] === _type) &&
+      (!validator || validator(object[property]))
     if (!valid) {
-      log.error(`response to GET ${urlUsed} invalid for property ${property}; value was:`, object[property], '| type was: ', typeof object[property])
+      log.error(
+        `response to GET ${urlUsed} invalid for property ${property}; value was:`,
+        object[property],
+        '| type was: ',
+        typeof object[property],
+      )
     }
     return valid
   })
 }
 
-export async function fetchTradesInfo ({
+export async function fetchTradesInfo({
   slippage,
   sourceToken,
   sourceDecimals,
@@ -176,9 +193,17 @@ export async function fetchTradesInfo ({
 
   const queryString = new URLSearchParams(urlParams).toString()
   const tradeURL = `${getBaseApi('trade')}${queryString}`
-  const tradesResponse = await fetchWithCache(tradeURL, { method: 'GET' }, { cacheRefreshTime: 0, timeout: 15000 })
+  const tradesResponse = await fetchWithCache(
+    tradeURL,
+    { method: 'GET' },
+    { cacheRefreshTime: 0, timeout: 15000 },
+  )
   const newQuotes = tradesResponse.reduce((aggIdTradeMap, quote) => {
-    if (quote.trade && !quote.error && validateData(QUOTE_VALIDATORS, quote, tradeURL)) {
+    if (
+      quote.trade &&
+      !quote.error &&
+      validateData(QUOTE_VALIDATORS, quote, tradeURL)
+    ) {
       const constructedTrade = constructTxParams({
         to: quote.trade.to,
         from: quote.trade.from,
@@ -211,28 +236,48 @@ export async function fetchTradesInfo ({
   return newQuotes
 }
 
-export async function fetchTokens () {
+export async function fetchTokens() {
   const tokenUrl = getBaseApi('tokens')
-  const tokens = await fetchWithCache(tokenUrl, { method: 'GET' }, { cacheRefreshTime: CACHE_REFRESH_ONE_HOUR })
-  const filteredTokens = tokens.filter((token) => validateData(TOKEN_VALIDATORS, token, tokenUrl))
+  const tokens = await fetchWithCache(
+    tokenUrl,
+    { method: 'GET' },
+    { cacheRefreshTime: CACHE_REFRESH_ONE_HOUR },
+  )
+  const filteredTokens = tokens.filter((token) =>
+    validateData(TOKEN_VALIDATORS, token, tokenUrl),
+  )
   return filteredTokens
 }
 
-export async function fetchAggregatorMetadata () {
+export async function fetchAggregatorMetadata() {
   const aggregatorMetadataUrl = getBaseApi('aggregatorMetadata')
-  const aggregators = await fetchWithCache(aggregatorMetadataUrl, { method: 'GET' }, { cacheRefreshTime: CACHE_REFRESH_ONE_HOUR })
+  const aggregators = await fetchWithCache(
+    aggregatorMetadataUrl,
+    { method: 'GET' },
+    { cacheRefreshTime: CACHE_REFRESH_ONE_HOUR },
+  )
   const filteredAggregators = {}
   for (const aggKey in aggregators) {
-    if (validateData(AGGREGATOR_METADATA_VALIDATORS, aggregators[aggKey], aggregatorMetadataUrl)) {
+    if (
+      validateData(
+        AGGREGATOR_METADATA_VALIDATORS,
+        aggregators[aggKey],
+        aggregatorMetadataUrl,
+      )
+    ) {
       filteredAggregators[aggKey] = aggregators[aggKey]
     }
   }
   return filteredAggregators
 }
 
-export async function fetchTopAssets () {
+export async function fetchTopAssets() {
   const topAssetsUrl = getBaseApi('topAssets')
-  const response = await fetchWithCache(topAssetsUrl, { method: 'GET' }, { cacheRefreshTime: CACHE_REFRESH_ONE_HOUR })
+  const response = await fetchWithCache(
+    topAssetsUrl,
+    { method: 'GET' },
+    { cacheRefreshTime: CACHE_REFRESH_ONE_HOUR },
+  )
   const topAssetsMap = response.reduce((_topAssetsMap, asset, index) => {
     if (validateData(TOP_ASSET_VALIDATORS, asset, topAssetsUrl)) {
       return { ..._topAssetsMap, [asset.address]: { index: String(index) } }
@@ -242,24 +287,36 @@ export async function fetchTopAssets () {
   return topAssetsMap
 }
 
-export async function fetchSwapsFeatureLiveness () {
-  const status = await fetchWithCache(getBaseApi('featureFlag'), { method: 'GET' }, { cacheRefreshTime: 600000 })
+export async function fetchSwapsFeatureLiveness() {
+  const status = await fetchWithCache(
+    getBaseApi('featureFlag'),
+    { method: 'GET' },
+    { cacheRefreshTime: 600000 },
+  )
   return status?.active
 }
 
-export async function fetchMetaMaskFeeAmount () {
-  const response = await fetchWithCache(getBaseApi('feeAmount'), { method: 'GET' }, { cacheRefreshTime: 600000 })
+export async function fetchMetaMaskFeeAmount() {
+  const response = await fetchWithCache(
+    getBaseApi('feeAmount'),
+    { method: 'GET' },
+    { cacheRefreshTime: 600000 },
+  )
   return response?.fee
 }
 
-export async function fetchTokenPrice (address) {
+export async function fetchTokenPrice(address) {
   const query = `contract_addresses=${address}&vs_currencies=eth`
 
-  const prices = await fetchWithCache(`https://api.coingecko.com/api/v3/simple/token_price/ethereum?${query}`, { method: 'GET' }, { cacheRefreshTime: 60000 })
+  const prices = await fetchWithCache(
+    `https://api.coingecko.com/api/v3/simple/token_price/ethereum?${query}`,
+    { method: 'GET' },
+    { cacheRefreshTime: 60000 },
+  )
   return prices && prices[address]?.eth
 }
 
-export async function fetchTokenBalance (address, userAddress) {
+export async function fetchTokenBalance(address, userAddress) {
   const tokenContract = global.eth.contract(abi).at(address)
   const tokenBalancePromise = tokenContract
     ? tokenContract.balanceOf(userAddress)
@@ -268,8 +325,16 @@ export async function fetchTokenBalance (address, userAddress) {
   return usersToken
 }
 
-export function getRenderableGasFeesForQuote (tradeGas, approveGas, gasPrice, currentCurrency, conversionRate) {
-  const totalGasLimitForCalculation = (new BigNumber(tradeGas || '0x0', 16)).plus(approveGas || '0x0', 16).toString(16)
+export function getRenderableGasFeesForQuote(
+  tradeGas,
+  approveGas,
+  gasPrice,
+  currentCurrency,
+  conversionRate,
+) {
+  const totalGasLimitForCalculation = new BigNumber(tradeGas || '0x0', 16)
+    .plus(approveGas || '0x0', 16)
+    .toString(16)
   const gasTotalInWeiHex = calcGasTotal(totalGasLimitForCalculation, gasPrice)
 
   const ethFee = getValueFromWeiHex({
@@ -292,11 +357,35 @@ export function getRenderableGasFeesForQuote (tradeGas, approveGas, gasPrice, cu
   }
 }
 
-export function quotesToRenderableData (quotes, gasPrice, conversionRate, currentCurrency, approveGas, tokenConversionRates, customGasLimit) {
+export function quotesToRenderableData(
+  quotes,
+  gasPrice,
+  conversionRate,
+  currentCurrency,
+  approveGas,
+  tokenConversionRates,
+  customGasLimit,
+) {
   return Object.values(quotes).map((quote) => {
-    const { destinationAmount = 0, sourceAmount = 0, sourceTokenInfo, destinationTokenInfo, slippage, aggType, aggregator, gasEstimateWithRefund, averageGas } = quote
-    const sourceValue = calcTokenAmount(sourceAmount, sourceTokenInfo.decimals || 18).toString(10)
-    const destinationValue = calcTokenAmount(destinationAmount, destinationTokenInfo.decimals || 18).toPrecision(8)
+    const {
+      destinationAmount = 0,
+      sourceAmount = 0,
+      sourceTokenInfo,
+      destinationTokenInfo,
+      slippage,
+      aggType,
+      aggregator,
+      gasEstimateWithRefund,
+      averageGas,
+    } = quote
+    const sourceValue = calcTokenAmount(
+      sourceAmount,
+      sourceTokenInfo.decimals || 18,
+    ).toString(10)
+    const destinationValue = calcTokenAmount(
+      destinationAmount,
+      destinationTokenInfo.decimals || 18,
+    ).toPrecision(8)
 
     const {
       feeInFiat,
@@ -304,11 +393,9 @@ export function quotesToRenderableData (quotes, gasPrice, conversionRate, curren
       rawEthFee,
       feeInEth,
     } = getRenderableGasFeesForQuote(
-      (
-        customGasLimit ||
+      customGasLimit ||
         gasEstimateWithRefund ||
-        decimalToHex(averageGas || 800000)
-      ),
+        decimalToHex(averageGas || 800000),
       approveGas,
       gasPrice,
       currentCurrency,
@@ -316,15 +403,28 @@ export function quotesToRenderableData (quotes, gasPrice, conversionRate, curren
     )
 
     const metaMaskFee = `0.875%`
-    const slippageMultiplier = (new BigNumber(100 - slippage)).div(100)
-    const minimumAmountReceived = (new BigNumber(destinationValue)).times(slippageMultiplier).toFixed(6)
+    const slippageMultiplier = new BigNumber(100 - slippage).div(100)
+    const minimumAmountReceived = new BigNumber(destinationValue)
+      .times(slippageMultiplier)
+      .toFixed(6)
 
-    const tokenConversionRate = tokenConversionRates[destinationTokenInfo.address]
-    const ethValueOfTrade = destinationTokenInfo.symbol === 'ETH'
-      ? calcTokenAmount(destinationAmount, destinationTokenInfo.decimals || 18).minus(rawEthFee, 10)
-      : (new BigNumber(tokenConversionRate || 0, 10))
-        .times(calcTokenAmount(destinationAmount, destinationTokenInfo.decimals || 18), 10)
-        .minus(rawEthFee, 10)
+    const tokenConversionRate =
+      tokenConversionRates[destinationTokenInfo.address]
+    const ethValueOfTrade =
+      destinationTokenInfo.symbol === 'ETH'
+        ? calcTokenAmount(
+            destinationAmount,
+            destinationTokenInfo.decimals || 18,
+          ).minus(rawEthFee, 10)
+        : new BigNumber(tokenConversionRate || 0, 10)
+            .times(
+              calcTokenAmount(
+                destinationAmount,
+                destinationTokenInfo.decimals || 18,
+              ),
+              10,
+            )
+            .minus(rawEthFee, 10)
 
     let liquiditySourceKey
     let renderedSlippage = slippage
@@ -364,58 +464,93 @@ export function quotesToRenderableData (quotes, gasPrice, conversionRate, curren
   })
 }
 
-export function getSwapsTokensReceivedFromTxMeta (tokenSymbol, txMeta, tokenAddress, accountAddress, tokenDecimals, approvalTxMeta) {
+export function getSwapsTokensReceivedFromTxMeta(
+  tokenSymbol,
+  txMeta,
+  tokenAddress,
+  accountAddress,
+  tokenDecimals,
+  approvalTxMeta,
+) {
   const txReceipt = txMeta?.txReceipt
   if (tokenSymbol === 'ETH') {
-    if (!txReceipt || !txMeta || !txMeta.postTxBalance || !txMeta.preTxBalance) {
+    if (
+      !txReceipt ||
+      !txMeta ||
+      !txMeta.postTxBalance ||
+      !txMeta.preTxBalance
+    ) {
       return null
     }
 
     let approvalTxGasCost = '0x0'
     if (approvalTxMeta && approvalTxMeta.txReceipt) {
-      approvalTxGasCost = calcGasTotal(approvalTxMeta.txReceipt.gasUsed, approvalTxMeta.txParams.gasPrice)
+      approvalTxGasCost = calcGasTotal(
+        approvalTxMeta.txReceipt.gasUsed,
+        approvalTxMeta.txParams.gasPrice,
+      )
     }
 
     const gasCost = calcGasTotal(txReceipt.gasUsed, txMeta.txParams.gasPrice)
-    const totalGasCost = (new BigNumber(gasCost, 16)).plus(approvalTxGasCost, 16).toString(16)
+    const totalGasCost = new BigNumber(gasCost, 16)
+      .plus(approvalTxGasCost, 16)
+      .toString(16)
 
-    const preTxBalanceLessGasCost = subtractCurrencies(txMeta.preTxBalance, totalGasCost, {
-      aBase: 16,
-      bBase: 16,
-      toNumericBase: 'hex',
-    })
+    const preTxBalanceLessGasCost = subtractCurrencies(
+      txMeta.preTxBalance,
+      totalGasCost,
+      {
+        aBase: 16,
+        bBase: 16,
+        toNumericBase: 'hex',
+      },
+    )
 
-    const ethReceived = subtractCurrencies(txMeta.postTxBalance, preTxBalanceLessGasCost, {
-      aBase: 16,
-      bBase: 16,
-      fromDenomination: 'WEI',
-      toDenomination: 'ETH',
-      toNumericBase: 'dec',
-      numberOfDecimals: 6,
-    })
+    const ethReceived = subtractCurrencies(
+      txMeta.postTxBalance,
+      preTxBalanceLessGasCost,
+      {
+        aBase: 16,
+        bBase: 16,
+        fromDenomination: 'WEI',
+        toDenomination: 'ETH',
+        toNumericBase: 'dec',
+        numberOfDecimals: 6,
+      },
+    )
     return ethReceived
   }
   const txReceiptLogs = txReceipt?.logs
   if (txReceiptLogs && txReceipt?.status !== '0x0') {
     const tokenTransferLog = txReceiptLogs.find((txReceiptLog) => {
-      const isTokenTransfer = txReceiptLog.topics && txReceiptLog.topics[0] === TOKEN_TRANSFER_LOG_TOPIC_HASH
+      const isTokenTransfer =
+        txReceiptLog.topics &&
+        txReceiptLog.topics[0] === TOKEN_TRANSFER_LOG_TOPIC_HASH
       const isTransferFromGivenToken = txReceiptLog.address === tokenAddress
-      const isTransferFromGivenAddress = txReceiptLog.topics && txReceiptLog.topics[2] && txReceiptLog.topics[2].match(accountAddress.slice(2))
-      return isTokenTransfer && isTransferFromGivenToken && isTransferFromGivenAddress
+      const isTransferFromGivenAddress =
+        txReceiptLog.topics &&
+        txReceiptLog.topics[2] &&
+        txReceiptLog.topics[2].match(accountAddress.slice(2))
+      return (
+        isTokenTransfer &&
+        isTransferFromGivenToken &&
+        isTransferFromGivenAddress
+      )
     })
     return tokenTransferLog
       ? toPrecisionWithoutTrailingZeros(
-        calcTokenAmount(tokenTransferLog.data, tokenDecimals).toString(10), 6,
-      )
+          calcTokenAmount(tokenTransferLog.data, tokenDecimals).toString(10),
+          6,
+        )
       : ''
   }
   return null
 }
 
-export function formatSwapsValueForDisplay (destinationAmount) {
+export function formatSwapsValueForDisplay(destinationAmount) {
   let amountToDisplay = toPrecisionWithoutTrailingZeros(destinationAmount, 12)
   if (amountToDisplay.match(/e[+-]/u)) {
-    amountToDisplay = (new BigNumber(amountToDisplay)).toFixed()
+    amountToDisplay = new BigNumber(amountToDisplay).toFixed()
   }
   return amountToDisplay
 }
