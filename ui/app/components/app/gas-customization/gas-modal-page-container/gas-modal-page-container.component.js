@@ -54,6 +54,8 @@ export default class GasModalPageContainer extends Component {
     isSwap: PropTypes.boolean,
     value: PropTypes.string,
     conversionRate: PropTypes.string,
+    noFetchOnMount: PropTypes.bool,
+    hideAdvancedTimeEstimates: PropTypes.bool,
   }
 
   state = {
@@ -61,15 +63,17 @@ export default class GasModalPageContainer extends Component {
   }
 
   componentDidMount () {
-    const promise = this.props.hideBasic
-      ? Promise.resolve(this.props.blockTime)
-      : this.props.fetchBasicGasAndTimeEstimates()
-        .then((basicEstimates) => basicEstimates.blockTime)
+    if (!this.props.noFetchOnMount) {
+      const promise = this.props.hideBasic
+        ? Promise.resolve(this.props.blockTime)
+        : this.props.fetchBasicGasAndTimeEstimates()
+          .then((basicEstimates) => basicEstimates.blockTime)
 
-    promise
-      .then((blockTime) => {
-        this.props.fetchGasEstimates(blockTime)
-      })
+      promise
+        .then((blockTime) => {
+          this.props.fetchGasEstimates(blockTime)
+        })
+    }
   }
 
   renderBasicTabContent (gasPriceButtonGroupProps) {
@@ -98,6 +102,7 @@ export default class GasModalPageContainer extends Component {
       },
       isEthereumNetwork,
       customGasLimitMessage,
+      hideAdvancedTimeEstimates,
     } = this.props
 
     return (
@@ -116,6 +121,7 @@ export default class GasModalPageContainer extends Component {
         isSpeedUp={isSpeedUp}
         isRetry={isRetry}
         isEthereumNetwork={isEthereumNetwork}
+        hideAdvancedTimeEstimates={hideAdvancedTimeEstimates}
       />
     )
   }
